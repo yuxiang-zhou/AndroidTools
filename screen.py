@@ -6,7 +6,7 @@ def main():
   before = time.time()
   control = utils.Control()
   screen = control.screenshot()
-
+  print(screen.shape)
   after = time.time()
 
   cv2.imshow('we get', screen)

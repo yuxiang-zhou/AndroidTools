@@ -182,7 +182,11 @@ class GoliangSwapState(TargetTransformDictAbs):
 
 def load_imgs():
   mubiao = {}
-  path = os.getcwd() + '/png'
+
+  control = utils.Control()
+  screen = control.screenshot()
+
+  path = os.getcwd() + '/png' + str(screen.shape[1])
   file_list = os.listdir(path)
 
   for f in file_list:
