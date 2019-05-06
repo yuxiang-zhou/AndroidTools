@@ -1,22 +1,11 @@
-import subprocess
+import utils
 import cv2
-import numpy as np
 import time
-from cStringIO import StringIO
-from PIL import Image
 
 def main():
   before = time.time()
-  pipe = subprocess.Popen(
-      "adb shell screencap -p",
-      stdin=subprocess.PIPE,
-      stdout=subprocess.PIPE,
-      shell=True)
-  image_bytes = pipe.stdout.read()
-
-
-  file_bytes = np.fromstring(image_bytes, np.uint8)
-  screen = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+  control = utils.Control()
+  screen = control.screenshot()
 
   after = time.time()
 
