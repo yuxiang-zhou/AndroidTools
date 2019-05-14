@@ -10,6 +10,7 @@ import sys
 import subprocess
 import numpy as np
 import utils
+import Queue as queue
 
 def log(f):
 
@@ -36,25 +37,33 @@ class StateBase(utils.Control):
     print('State: ' + self.name, self.count)
     before = time.time()
     screen = self.screenshot()
+    cv2.imshow('Video', cv2.resize(screen, (400,224)))
+    cv2.waitKey(1)
     s = self._step(screen)
+    cv2.imshow('Video', cv2.resize(screen, (400,224)))
+    cv2.waitKey(1)
     self.wait()
-    self.count += 1
+
+    after = time.time()
+    td = after - before
+    print('Elapse: {}'.format(td))
+    self.count += td
     self.on_count()
     if s != self.name:
       self.on_change_state()
-
-    after = time.time()
-    print('Elapse: {}'.format(after - before))
+    
     return s
 
   def on_count(self):
     if self.count > self._timeout_count:
       self.timeout = True
 
-    if self.count >= 40 and self.count % 10 == 0:
+    if self.count >= 40 and not hasattr(self, 'notifyed'):
       subprocess.call(['notify-send', 'yys', 'Count too large.'])
-      if self.count >= 100:
-        sys.exit(0)
+      self.notifyed = True
+      
+    if self.count >= 100 and hasattr(self, 'notifyed'):
+      sys.exit(0)
 
   def on_change_state(self):
     self.count = 0
@@ -67,7 +76,7 @@ class TargetTransformDict(StateBase):
                name,
                target_transfer_dict,
                timeout_transfer_state=None,
-               timeout_count=5,
+               timeout_count=10,
                click_offset=None,
                **kwargs):
     self.name = name
@@ -169,24 +178,22 @@ class GoliangSwapState(TargetTransformDictAbs):
   def __init__(self, *argv, **kwargs):
     super(GoliangSwapState, self).__init__(*argv, **kwargs)
     self._swipes = [
-        [(588, 1068), (608, 738)],
-        [(854, 1112), (1500, 706)],
+        [(1408, 1068), (608, 738)],
+        [(1664, 1112), (1500, 706)],
     ]
 
   def _action(self, unused_target_name, locs):
-
+    self.wait(1)
     for pos0, pos1 in self._swipes:
       self.swipe_abs(pos0, pos1)
       self.wait()
 
 
 def load_imgs():
+  print('Starting video pipe...')
   mubiao = {}
 
-  control = utils.Control()
-  screen = control.screenshot()
-
-  path = os.getcwd() + '/png' + str(screen.shape[1])
+  path = os.getcwd() + '/png' + str(2960)
   file_list = os.listdir(path)
 
   for f in file_list:
@@ -195,6 +202,7 @@ def load_imgs():
     a = [cv2.imread(file_path), 0.85, name]
     mubiao[name] = a
 
+  print('Video pipe established...')
   return mubiao
 
 
@@ -206,7 +214,7 @@ STATE_LIB = {
     'goliang':
         GoliangMainState(
             'goliang', {
-                ('boss', 'mobs', 'boss2'): 'goliangfullcheck',
+                ('boss', 'mobs'): 'goliangfullcheck',
                 'ep28': 'goliang',
                 'search': 'goliangsearch',
                 'chest': 'goliangfinalreward',
@@ -214,17 +222,17 @@ STATE_LIB = {
             verbose=0),
     'goliangsearch':
         GoliangMainState('goliangsearch', {
-            ('boss', 'mobs', 'boss2'): 'goliangfullcheck',
-        }),
+            ('boss', 'mobs'): 'goliangfullcheck',
+            'ready2': 'goliangreward', 
+        }, timeout_count=20, timeout_transfer_state='goliang'),
     'goliangfullcheck':
         TargetTransformDictAbs(
             'goliangfullcheck',
             {
                 'full': 'goliangselect',
-                # ('boss', 'mobs', 'boss2'): 'goliangfullcheck'
             },
             timeout_transfer_state='goliangready',
-            timeout_count=1,
+            timeout_count=2,
             click_offset=(1198, 1042)),
     'goliangselect':
         TargetTransformDict(
@@ -237,17 +245,18 @@ STATE_LIB = {
         GoliangSwapState('goliangswap', {'sc': 'goliangready'}),
     'goliangready':
         TargetTransformDict(
-            'goliangready', {'ready': 'goliangreward'},
+            'goliangready', {('ready2', 'ready'): 'goliangreward'},
             timeout_transfer_state='goliangsearch',
-            timeout_count=1),
+            timeout_count=5, verbose=0),
     'goliangreward':
         TargetTransformDict(
             'goliangreward', {'reward': 'goliang'},
+            timeout_count=20,
             timeout_transfer_state='goliangready'),
     'goliangfinalreward':
-        TargetTransformDict(
+        TargetTransformDictAbs(
             'goliangfinalreward', {'get_reward': 'goliang'},
-            click_offset=(600, -100),
+            click_offset=(2112, 256),
             timeout_transfer_state='goliang'),
 
     # state machine for event
@@ -267,9 +276,9 @@ if __name__ == '__main__':
 
   start_time = time.time()
   print('started', time.ctime())
-
   while True:
     NEXT_STATE = STATE_LIB[STATE].step()
     if NEXT_STATE != PRE_STATE:
       PRE_STATE = STATE
     STATE = NEXT_STATE
+

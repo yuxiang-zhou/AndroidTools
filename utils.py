@@ -2,7 +2,7 @@ import numpy as np
 import subprocess
 import cv2
 import time
-
+import os
 
 class Control(object):
 
@@ -18,7 +18,7 @@ class Control(object):
         np.fromstring(image_bytes, np.uint8), cv2.IMREAD_COLOR)
     return screen
 
-  def screenshot(self):
+  def screenshot_v1(self):
 
     subprocess.Popen(
       "adb shell screencap -p /sdcard/.tmp-screen.png",
@@ -32,6 +32,9 @@ class Control(object):
     while screen is None:
       screen = cv2.imread('.tmp-screen.png', cv2.IMREAD_COLOR)
     return screen
+
+  def screenshot(self):
+    return self.screenshot_v2()
 
   def touch(self, pos):
     x, y = pos
@@ -72,12 +75,6 @@ class Control(object):
         x, y = x * rescale, y * rescale
       loc_pos.append([x, y])
 
-    if self._verbose:
-      cv2.imwrite(
-          '/usr/local/google/home/yuxiangzhou/Downloads/screen_{:d}_{}.png'
-          .format(int(time.time()), kwargs.pop('target_name',
-                                               self.name)), screen)
-
     if len(loc_pos) == 0:
       print(c_name, 'not found')
 
@@ -93,11 +90,11 @@ class Control(object):
 
   def cheat(self, p, w=10, h=10):
     a, b = p
-    c, d = random.randint(-w, w), random.randint(-h, h)
+    c, d = np.random.randint(-w, w), np.random.randint(-h, h)
     e, f = a + c, b + d
     y = [e, f]
     return y
 
-  def wait(self, x=0.1, y=0.3):
-    t = random.uniform(x, y)
+  def wait(self, x=0.1, y=0.3, base=0.):
+    t = np.random.uniform(x, y) + base
     time.sleep(t)

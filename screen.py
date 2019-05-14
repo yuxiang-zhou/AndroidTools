@@ -9,9 +9,9 @@ def main():
   print(screen.shape)
   after = time.time()
 
-  cv2.imshow('we get', screen)
-  cv2.waitKey(0)
-  cv2.destroyAllWindows()
+  cv2.imwrite(
+          './screen_{}.png'
+          .format(int(time.time())), screen)
 
   print('Elapse: {}'.format(after - before))
 
