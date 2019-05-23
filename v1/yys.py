@@ -68,6 +68,7 @@ class StateBase(utils.Control):
   def on_change_state(self):
     self.count = 0
     self.timeout = False
+    self.wait(1.)
 
 
 class TargetTransformDict(StateBase):
@@ -190,7 +191,6 @@ class GoliangSwapState(TargetTransformDictAbs):
 
 
 def load_imgs():
-  print('Starting video pipe...')
   mubiao = {}
 
   path = os.getcwd() + '/png' + str(2960)
@@ -202,7 +202,6 @@ def load_imgs():
     a = [cv2.imread(file_path), 0.85, name]
     mubiao[name] = a
 
-  print('Video pipe established...')
   return mubiao
 
 
@@ -255,7 +254,10 @@ STATE_LIB = {
             timeout_transfer_state='goliangready'),
     'goliangfinalreward':
         TargetTransformDictAbs(
-            'goliangfinalreward', {'get_reward': 'goliang'},
+            'goliangfinalreward', {
+              'get_reward': 'goliang',
+              'get_reward_2': 'goliangfinalreward'
+            },
             click_offset=(2112, 256),
             timeout_transfer_state='goliang'),
 
