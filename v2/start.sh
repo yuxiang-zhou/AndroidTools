@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 #set size of your output display
-disp_size=2960x1440
+# disp_size=1440x2960
+# disp_size=360x740
+disp_size=740x360
 
 if ! which adb > /dev/null; then
 	echo "Error: adb not found in path!"
@@ -67,8 +69,8 @@ echo " * Forwarding ports"
 adb forward tcp:1313 localabstract:minicap
 adb forward tcp:1111 localabstract:minitouch
 
-echo " * Staring GUI"
-python gui.py $disp_size $dev_size $dev_dir
+echo " * Staring GUI $disp_size $dev_size $dev_dir" 
+python gui.py $disp_size $dev_size $dev_dir $@
 
 echo " * Cleaning up"
 adb shell rm -rf $dev_dir

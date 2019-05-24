@@ -1,12 +1,15 @@
 import pygame
 import cStringIO
 import sys
+import utils
 from time import time
 
 from capclient import CapClient
 from touchclient import TouchClient
 from rotationclient import RotationClient
 from adbclient import AdbClient
+
+from state_machine import StateMachine
 
 MENU_TAP = 2
 MENU_TIMEOUT = 10
@@ -19,7 +22,7 @@ DOUBLECLICK_TIME = 0.2
 
 class Main():
     def __init__(self):
-        assert len(sys.argv) == 4
+        assert len(sys.argv) >= 4
         self.size = map(int, sys.argv[1].split("x"))
         orig = map(int, sys.argv[2].split("x"))
         self.orig = orig[1], orig[0]
@@ -57,9 +60,16 @@ class Main():
         #size of raw image in portrait mode
         self.sizep = int(self.orig[1] / self.scale), self.size[0]
 
-        self.rotation = 0
+        self.rotation = 90 if self.ratio > 1 else 0
 
+        print("scale", self.scale, "ratio", self.ratio)
         self.calc_scale()
+
+        # init state machine
+        self.state_machine = StateMachine(
+            utils.load_config(), 
+            utils.load_imgs(), 
+            entry_state=sys.argv[4] if len(sys.argv) >= 5 else 'goliang')
 
         pygame.init()
         pygame.font.init()
@@ -282,18 +292,26 @@ class Main():
                         frame_cache = pygame.transform.smoothscale(a, (self.proj[2], self.proj[3]))
                     else:
                         frame_cache = a.copy()
+                    
+                    screen = pygame.surfarray.array3d(frame_cache).transpose([1,0,2])[..., ::-1]
+                    self.action(screen)
 
                 self.screen_update = True
                         
             if self.screen_update:
                 self.screen.fill((0, 0, 0))   
                 self.screen_update = False
+                
                 self.screen.blit(frame_cache, (self.proj[0], self.proj[1]))   
                 if self.show_menu:
                     self.screen.blit(self.img_menu, (0, 0))
                 if self.show_nav:
                     self.screen.blit(self.img_nav, (self.size[0] - self.nav_w, 0))
                 pygame.display.update()
+
+    def action(self, screen):
+        utils.save_screen(screen)
+        self.state_machine.step(screen)
                         
 
              
