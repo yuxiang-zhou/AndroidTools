@@ -50,7 +50,7 @@ def locate(screen, want, rescale=1, verbose=False):
       x, y = x * rescale, y * rescale
     loc_pos.append([x, y])
 
-  if len(loc_pos) == 0:
+  if verbose and len(loc_pos) == 0:
     print(c_name, 'not found')
 
   return loc_pos

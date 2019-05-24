@@ -310,7 +310,7 @@ class Main():
                 pygame.display.update()
 
     def action(self, screen):
-        utils.save_screen(screen)
+        # utils.save_screen(screen)
         self.state_machine.step(screen)
                         
 
