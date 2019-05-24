@@ -10,7 +10,6 @@
                 "boss": {"state":"goliangfullcheck"},
                 "boss2": {"state":"goliangfullcheck"}
             },
-            "timeout_count": 10,
             "timeout_actions": [
                 ["swipe", [1400, 720, 1000, 720]]
             ],
@@ -22,7 +21,6 @@
                 "boss": {"state":"goliangfullcheck"},
                 "boss2": {"state":"goliangfullcheck"}
             },
-            "timeout_count": 10,
             "timeout_transfer_state": "goliang"
         },
         "goliangfullcheck": {
@@ -32,7 +30,7 @@
                     "actions": [["click", [1198, 1042]]]
                 }
             },
-            "timeout_count": 5,
+            "timeout_count": 3,
             "timeout_transfer_state": "goliangready"
         },
         "goliangselect": {
@@ -40,7 +38,6 @@
                 "select_all": {"state":"goliangselect"},
                 "select_sc": {"state":"goliangswap"}
             },
-            "timeout_count": 10,
             "timeout_transfer_state": "goliangfullcheck"
         },
         "goliangswap": {
@@ -53,7 +50,6 @@
                     ]
                 }
             },
-            "timeout_count": 10,
             "timeout_transfer_state": "goliangswap"
         },
         "goliangready": {
@@ -68,12 +64,12 @@
                 "get_reward": {"state":"goliang", "actions": [["click", [2112, 256]]]},
                 "get_reward_2": {"state":"goliangreward", "actions": [["click", [2112, 256]]]}
             },
-            "timeout_count": 10,
             "timeout_transfer_state": "goliang"
         },
         "goliangreward": {
             "transitions": {
-                "reward": {"state": "goliang"}
+                "reward": {"state": "goliang"},
+                "win": {"state": "goliangreward"}
             },
             "timeout_count": 20,
             "timeout_transfer_state": "goliangready"

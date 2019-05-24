@@ -1,3 +1,6 @@
+from absl import flags
+from absl import logging
+
 import pygame
 import cStringIO
 import sys
@@ -20,13 +23,22 @@ NAV_WIDTH = 7
 
 DOUBLECLICK_TIME = 0.2
 
+flags.DEFINE_string("display_size", "740x360", "Set Display Size.")
+flags.DEFINE_string("device_size", "2960x1440", "Set Device Size.")
+flags.DEFINE_string("device_dir", "", "Set temporary device binary path.")
+flags.DEFINE_string("entry_state", "goliang", "Entry State.")
+flags.DEFINE_boolean("verbose", False, "whether go verbose.")
+flags.DEFINE_boolean("dump_screen", False, "whether dump screen.")
+
+FLAGS = flags.FLAGS
+FLAGS(sys.argv)
 class Main():
     def __init__(self):
-        assert len(sys.argv) >= 4
-        self.size = map(int, sys.argv[1].split("x"))
-        orig = map(int, sys.argv[2].split("x"))
+        
+        self.size = map(int, FLAGS.display_size.split("x"))
+        orig = map(int, FLAGS.device_size.split("x"))
         self.orig = orig[1], orig[0]
-        self.path = sys.argv[3]
+        self.path = FLAGS.device_dir
         
         self.scalel = True
         self.scalep = False
@@ -62,14 +74,15 @@ class Main():
 
         self.rotation = 90 if self.ratio > 1 else 0
 
-        print("scale", self.scale, "ratio", self.ratio)
+        logging.info("scale: %f, ratio: %f", self.scale, self.ratio)
         self.calc_scale()
 
         # init state machine
         self.state_machine = StateMachine(
             utils.load_config(), 
             utils.load_imgs(), 
-            entry_state=sys.argv[4] if len(sys.argv) >= 5 else 'goliang')
+            entry_state=FLAGS.entry_state,
+            verbose=FLAGS.verbose)
 
         pygame.init()
         pygame.font.init()
@@ -310,10 +323,12 @@ class Main():
                 pygame.display.update()
 
     def action(self, screen):
-        # utils.save_screen(screen)
+        if FLAGS.dump_screen:
+            utils.save_screen(screen)
         self.state_machine.step(screen)
                         
 
-             
-a = Main()
-a.run()
+if __name__ == "__main__":
+
+    gui = Main()
+    gui.run()
