@@ -1,8 +1,10 @@
 {
+    "default_timeout_count": 10,
+    "default_start_delay": 1,
     "state_config": {
         "goliang": {
             "transitions": {
-                "ep28": {"state":"goliang"},
+                "ep28": {"state":"goliangep28", "actions":[["click", [2518, 1196]]]},
                 "reward": {"state": "goliang"},
                 "search": {"state":"goliangsearch"},
                 "chest": {"state":"goliangfinalreward"},
@@ -13,6 +15,12 @@
             "timeout_actions": [
                 ["swipe", [1400, 720, 1000, 720]]
             ],
+            "timeout_transfer_state": "goliang"
+        },
+        "goliangep28": {
+            "transitions": {
+                "search": {"state":"goliangsearch"}
+            },
             "timeout_transfer_state": "goliang"
         },
         "goliangsearch": {
@@ -28,14 +36,24 @@
                 "full": {
                     "state":"goliangselect", 
                     "actions": [["click", [1198, 1042]]]
+                },
+                "full_2": {
+                    "state":"goliangselect", 
+                    "actions": [["click", [1198, 1042]]]
                 }
             },
-            "timeout_count": 3,
+            "timeout_count": 5,
             "timeout_transfer_state": "goliangready"
         },
         "goliangselect": {
             "transitions": {
-                "select_all": {"state":"goliangselect"},
+                "select_all": {"state":"goliangselect_sc"},
+                "select_sc": {"state":"goliangswap"}
+            },
+            "timeout_transfer_state": "goliangfullcheck"
+        },
+        "goliangselect_sc": {
+            "transitions": {
                 "select_sc": {"state":"goliangswap"}
             },
             "timeout_transfer_state": "goliangfullcheck"
@@ -43,14 +61,22 @@
         "goliangswap": {
             "transitions": {
                 "sc": {
-                    "state":"goliangready", 
+                    "state":"goliangswapready", 
                     "actions": [
                         ["swipe", [1408, 1068, 608, 738]],
                         ["swipe", [1664, 1112, 1500, 706]]
                     ]
                 }
             },
-            "timeout_transfer_state": "goliangswap"
+            "timeout_transfer_state": "goliangready"
+        },
+        "goliangswapready": {
+            "transitions": {
+                "ready": {"state":"goliangreward"}
+            },
+            "timeout_count": 10,
+            "timeout_transfer_state": "goliangsearch",
+            "start_delay": 5
         },
         "goliangready": {
             "transitions": {
@@ -69,7 +95,14 @@
         "goliangreward": {
             "transitions": {
                 "reward": {"state": "goliang"},
-                "win": {"state": "goliangreward"}
+                "win": {"state": "goliangreward_win"}
+            },
+            "timeout_count": 20,
+            "timeout_transfer_state": "goliangready"
+        },
+        "goliangreward_win": {
+            "transitions": {
+                "reward": {"state": "goliang"}
             },
             "timeout_count": 20,
             "timeout_transfer_state": "goliangready"

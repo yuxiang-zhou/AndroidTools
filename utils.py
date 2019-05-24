@@ -50,7 +50,7 @@ def locate(screen, want, rescale=1, verbose=False):
       x, y = x * rescale, y * rescale
     loc_pos.append([x, y])
 
-  if verbose and len(loc_pos) == 0:
+  if verbose > 1 and len(loc_pos) == 0:
     print(c_name, 'not found')
 
   return loc_pos
@@ -76,7 +76,7 @@ def wait(x=0.1, y=0.3, base=0.):
 
 def save_screen(screen):
   cv2.imwrite(
-    './screen_{}.png'
+    './screen/{}.png'
     .format(int(time.time())), screen)
 
 def load_imgs(path='png'):
