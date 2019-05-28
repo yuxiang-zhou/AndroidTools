@@ -22,7 +22,7 @@ class TouchClient(MyThread):
         return tmp
         
     def send(self, data):
-        data += "\nc\n";
+        data += "\nc\n"
         self.socket.sendall(data)
         
     def run(self):
