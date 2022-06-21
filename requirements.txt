@@ -1,5 +1,5 @@
 absl-py==0.7.1
-numpy==1.16.2
+numpy==1.22.0
 opencv-python==4.0.0.21
 Pillow==6.0.0
 pygame==1.9.6
